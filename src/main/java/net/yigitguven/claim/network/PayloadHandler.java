@@ -1,20 +1,9 @@
 package net.yigitguven.claim.network;
 
 import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.yigitguven.claim.core.ClientClaimManager;
 
 public class PayloadHandler
 {
-    public static void handleSync(final ClaimSyncPayload payload, final IPayloadContext context)
-    {
-        System.out.println("[Claim] Received sync payload with " + payload.claims().size() + " claims.");
-        context.enqueueWork(() -> {
-            ClientClaimManager.setClaims(payload.claims());
-            System.out.println("[Claim] Claims updated in ClientClaimManager. Refreshing Xaero Map...");
-            net.yigitguven.claim.integration.XaeroMapIntegration.refresh();
-        });
-    }
-
     public static void handleRequestClaim(final net.yigitguven.claim.network.RequestClaimPayload payload, final IPayloadContext context)
     {
         System.out.println("[Claim] Received request claim payload from " + context.player().getName().getString());
@@ -73,13 +62,6 @@ public class PayloadHandler
             {
                 net.yigitguven.claim.core.ClaimManager.removeClaims(player.serverLevel(), payload.claimIds(), player.getUUID());
             }
-        });
-    }
-
-    public static void handleOpenList(final OpenClaimListPayload payload, final IPayloadContext context)
-    {
-        context.enqueueWork(() -> {
-            net.minecraft.client.Minecraft.getInstance().setScreen(new net.yigitguven.claim.client.ClaimListScreen());
         });
     }
 

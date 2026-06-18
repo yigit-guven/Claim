@@ -41,11 +41,23 @@ public class Claim
     {
         LOGGER.info("Registering payloads for mod: {}", MODID);
         final PayloadRegistrar registrar = event.registrar(MODID).versioned("1.0");
-        registrar.playToClient(
-                ClaimSyncPayload.TYPE,
-                ClaimSyncPayload.STREAM_CODEC,
-                PayloadHandler::handleSync
-        );
+
+        if (net.neoforged.fml.loading.FMLEnvironment.dist.isClient()) {
+            registrar.playToClient(
+                    ClaimSyncPayload.TYPE,
+                    ClaimSyncPayload.STREAM_CODEC,
+                    net.yigitguven.claim.client.ClientPayloadHandler::handleSync
+            );
+            registrar.playToClient(
+                    net.yigitguven.claim.network.OpenClaimListPayload.TYPE,
+                    net.yigitguven.claim.network.OpenClaimListPayload.CODEC,
+                    net.yigitguven.claim.client.ClientPayloadHandler::handleOpenList
+            );
+        } else {
+            registrar.playToClient(ClaimSyncPayload.TYPE, ClaimSyncPayload.STREAM_CODEC, (p, c) -> {});
+            registrar.playToClient(net.yigitguven.claim.network.OpenClaimListPayload.TYPE, net.yigitguven.claim.network.OpenClaimListPayload.CODEC, (p, c) -> {});
+        }
+
         registrar.playToServer(
                 net.yigitguven.claim.network.RequestClaimPayload.TYPE,
                 net.yigitguven.claim.network.RequestClaimPayload.STREAM_CODEC,
@@ -55,11 +67,6 @@ public class Claim
                 net.yigitguven.claim.network.RequestUnclaimPayload.TYPE,
                 net.yigitguven.claim.network.RequestUnclaimPayload.STREAM_CODEC,
                 PayloadHandler::handleRequestUnclaim
-        );
-        registrar.playToClient(
-                net.yigitguven.claim.network.OpenClaimListPayload.TYPE,
-                net.yigitguven.claim.network.OpenClaimListPayload.CODEC,
-                PayloadHandler::handleOpenList
         );
         registrar.playToServer(
                 net.yigitguven.claim.network.UpdateClaimMetadataPayload.TYPE,
